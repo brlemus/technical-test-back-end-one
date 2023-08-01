@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing'
-import { ProcessJsonController } from './process-json.controller'
-import { IProcessJsonService } from '../../domain/process-json/services/process-json.service.interfaces'
+import { ProcessJsonController } from './email.controller'
+import { IEmailService } from '../../domain/process-json/services/email.service.interfaces'
 import { provideService } from '../../utils/service-provider'
-import { ProcessJsonService } from '../../domain/process-json/services/process-json.service'
+import { EmailService } from '../../domain/process-json/services/email.service'
 import { requestData, responseData } from '../../domain/process-json/mocks/process-json.mock'
 
 describe('ProcessJsonController', () => {
@@ -11,7 +11,7 @@ describe('ProcessJsonController', () => {
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
       controllers: [ProcessJsonController],
-      providers: [ provideService(IProcessJsonService, ProcessJsonService)],
+      providers: [ provideService(IEmailService, EmailService)],
     }).compile()
 
     processJsonController = app.get(ProcessJsonController)

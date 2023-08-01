@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common'
-import { ProcessJsonController } from './controllers/process-json.controller'
+import { ProcessJsonController } from './controllers/email.controller'
 import { DomainModule } from '../domain/domain.module'
 
 @Module({

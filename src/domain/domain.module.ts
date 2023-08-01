@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common'
-import { IProcessJsonService } from './process-json/services/process-json.service.interfaces'
-import { ProcessJsonService } from './process-json/services/process-json.service'
+import { IEmailService } from './process-json/services/email.service.interfaces'
+import { EmailService } from './process-json/services/email.service'
 import { provideService } from '../utils/service-provider'
 
 const services = [
-  provideService(IProcessJsonService, ProcessJsonService),
+  provideService(IEmailService, EmailService),
 ]
 
 @Module({
@@ -12,7 +12,7 @@ const services = [
   exports: [...services],
   providers: [
     ...services,
-    ProcessJsonService,
+    EmailService,
   ],
 })
 export class DomainModule {}

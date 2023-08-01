@@ -1,20 +1,20 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { Logger } from '@nestjs/common'
-import { ProcessJsonService } from './process-json.service'
+import { EmailService } from './email.service'
 import { requestData, responseData } from '../mocks/process-json.mock'
 
 jest.spyOn(Logger, 'error').mockImplementation(jest.fn())
 
 describe('AdminService', () => {
   let module: TestingModule
-  let processJsonService: ProcessJsonService
+  let processJsonService: EmailService
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
-      providers: [ProcessJsonService],
+      providers: [EmailService],
     }).compile()
 
-    processJsonService = module.get(ProcessJsonService)
+    processJsonService = module.get(EmailService)
   })
 
   it('should be defined', () => {
