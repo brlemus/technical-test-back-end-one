@@ -47,3 +47,16 @@ export const responseData = {
         'recipient'
     ]
 }
+
+export const mockJsonData = {
+    key: 'value',
+}
+
+export const mockEmailData = {
+    attachments: [
+        {
+            contentType: 'application/json',
+            content: Buffer.from(JSON.stringify(mockJsonData)),
+        },
+    ],
+}

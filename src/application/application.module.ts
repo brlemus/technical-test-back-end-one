@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common'
-import { ProcessJsonController } from './controllers/email.controller'
+import { EmailController } from './controllers/email.controller'
 import { DomainModule } from '../domain/domain.module'
 
 @Module({
   imports: [DomainModule],
-  controllers: [ProcessJsonController],
+  controllers: [EmailController],
   providers: [],
 })
 export class ApplicationModule {}

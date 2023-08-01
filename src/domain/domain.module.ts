@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
-import { IEmailService } from './process-json/services/email.service.interfaces'
-import { EmailService } from './process-json/services/email.service'
+import { IEmailService } from './process-email/services/email.service.interfaces'
+import { EmailService } from './process-email/services/email.service'
 import { provideService } from '../utils/service-provider'
 
 const services = [

@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common'
-import { MailParser, simpleParser } from 'mailparser';
-import axios from 'axios';
-import { readFile } from 'fs/promises';
+import { MailParser, simpleParser } from 'mailparser'
+import axios from 'axios'
+import { readFile } from 'fs/promises'
 import { IEmailService } from './email.service.interfaces'
 import { requestedJsonDto } from '../dtos/request/requestedJson.dto'
 import { TransformedJsonDto } from '../dtos/response/transformedJson.dto'
@@ -20,7 +20,7 @@ export class EmailService implements IEmailService {
   }
 
   async processJson(input: requestedJsonDto): Promise<TransformedJsonDto[]> {
-    try{
+    try {
       const response = input.Records.map((record) => {
         return {
           spam: record.ses.receipt.spamVerdict.status === 'PASS',
@@ -35,57 +35,61 @@ export class EmailService implements IEmailService {
           receptor: record.ses.mail.destination.map((recipient) => recipient.split('@')[0]),
         }
       })
-      
+
       return plainToInstance(TransformedJsonDto, response)
-    }catch (error) {
+    } catch (error) {
       this.logger.error(error)
-      throw new HttpException('Failed to parse request json.', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException('Failed to parse request json.', HttpStatus.INTERNAL_SERVER_ERROR)
     }
-   
+
   }
 
   async getAttachmentJson(urlOrPath: string): Promise<object> {
     try {
-      const emailContent = await this.fetchEmailContent(urlOrPath);
-      const mailData = await this.parseMail(emailContent);
-      const jsonData = this.extractJsonFromMail(mailData);
-
-      return jsonData;
+      const emailContent = await this.fetchContent(urlOrPath)
+      const mailData = await simpleParser(emailContent)
+      const jsonData = await this.extractJson(mailData)
+      return jsonData
     } catch (error) {
       this.logger.error(error)
-      throw new HttpException('Failed to parse email.', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException('Failed to parse email.', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
 
-
-  private async fetchEmailContent(urlOrPath: string): Promise<string> {
+  private async fetchContent(urlOrPath: string): Promise<string> {
     if (urlOrPath.startsWith('http://') || urlOrPath.startsWith('https://')) {
-      const response = await axios.get(urlOrPath);
+      const response = await axios.get(urlOrPath)
 
-      return response.data;
+      return response.data
     } else {
 
-      return await readFile(urlOrPath.replace(/\\/g, '/'), 'utf-8');
+      return await readFile(urlOrPath.replace(/\\/g, '/'), 'utf-8')
     }
   }
 
-  private async parseMail(emailContent: string): Promise<MailParser.ParsedMail> {
-    const mailData = await simpleParser(emailContent);
-
-    return mailData;
-  }
-
-  private extractJsonFromMail(mailData: MailParser.ParsedMail): object {
-    const attachments = mailData.attachments;
+  private async extractJson(mailData: MailParser.ParsedMail): Promise<object> {
+    const attachments = mailData.attachments
     if (attachments && attachments.length > 0) {
       for (const attachment of attachments) {
         if (attachment.contentType === 'application/json') {
-          const jsonData = JSON.parse(attachment.content.toString('utf-8'));
-          return jsonData;
+          const jsonData = JSON.parse(attachment.content.toString('utf-8'))
+          return jsonData
         }
       }
+    } else if (mailData.html) {
+      const url = this.getUrlFromHtml(mailData.html)
+      if (url) {
+        const response = await axios.get(url)
+        return response.data
+      }
     }
-    
-    throw new HttpException('JSON not found in email attachments.', HttpStatus.NOT_FOUND);
+
+    throw new HttpException('No JSON found.', HttpStatus.NOT_FOUND)
+  }
+
+  private getUrlFromHtml(html: string): string | null {
+    const linkRegex = /<a[^>]+href="([^"]+)"/
+    const matches = html.match(linkRegex)
+    return matches ? matches[1] : null
   }
 }

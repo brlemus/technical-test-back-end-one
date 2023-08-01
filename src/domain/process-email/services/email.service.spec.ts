@@ -1,29 +1,30 @@
 import { Test, TestingModule } from '@nestjs/testing'
-import { Logger } from '@nestjs/common'
+import { HttpException, Logger } from '@nestjs/common'
+import * as fs from 'fs'
 import { EmailService } from './email.service'
-import { requestData, responseData } from '../mocks/process-json.mock'
+import { mockEmailData, mockJsonData, requestData, responseData } from '../mocks/process-email.mock'
 
 jest.spyOn(Logger, 'error').mockImplementation(jest.fn())
 
-describe('AdminService', () => {
+describe('EmailService', () => {
   let module: TestingModule
-  let processJsonService: EmailService
+  let emailService: EmailService
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
       providers: [EmailService],
     }).compile()
 
-    processJsonService = module.get(EmailService)
+    emailService = module.get(EmailService)
   })
 
   it('should be defined', () => {
-    expect(processJsonService).toBeDefined()
+    expect(emailService).toBeDefined()
   })
 
   describe('getHello', () => {
     it('should return "Hello World!"', () => {
-      expect(processJsonService.getHello()).toBe('Hello World!')
+      expect(emailService.getHello()).toBe('Hello World!')
     })
   })
 
@@ -31,10 +32,32 @@ describe('AdminService', () => {
     it('should mapping request json', async () => {
       const data = requestData
 
-      const response = await processJsonService.processJson(data)
+      const response = await emailService.processJson(data)
 
       expect(response).toMatchObject([responseData])
     })
+  })
+
+  describe('getAttachmentJson', () => {
+    it('should get JSON attachment in the email', async () => {
+      const urlOrPath = 'path/email'
+      emailService['fetchContent'] = jest.fn().mockResolvedValue(JSON.stringify(mockEmailData))
+      emailService['extractJson'] = jest.fn().mockResolvedValue(mockJsonData)
+
+      const result = await emailService.getAttachmentJson(urlOrPath)
+      
+      expect(result).toMatchObject(mockJsonData)
+
+    })
+
+    it('should handle error when email does not contain JSON attachment', async () => {
+      const urlOrPath = 'path/email'
+      emailService['fetchContent'] = jest.fn().mockResolvedValue(JSON.stringify(mockEmailData))
+      emailService['extractJson'] = jest.fn().mockRejectedValue(new Error('JSON not found in email attachments.'))
+ 
+      await expect(emailService.getAttachmentJson(urlOrPath)).rejects.toThrowError(new HttpException('Failed to parse email.', 500))
+    })
+
   })
 
 })
