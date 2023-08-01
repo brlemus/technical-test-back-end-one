@@ -20,7 +20,6 @@ export class EmailController {
 
   @Get('/attachmentJson')
   async attachmentJson(@Query('urlOrPath') urlOrPath: string): Promise<object> {
-    console.log(urlOrPath)
     return this.emailService.getAttachmentJson(urlOrPath)
   }
 
