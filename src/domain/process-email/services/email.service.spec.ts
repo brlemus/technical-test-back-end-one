@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { HttpException, Logger } from '@nestjs/common'
-import * as fs from 'fs'
 import { EmailService } from './email.service'
 import { mockEmailData, mockJsonData, requestData, responseData } from '../mocks/process-email.mock'
 
